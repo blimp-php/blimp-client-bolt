@@ -1,0 +1,42 @@
+{#=== INIT ===========================================================================================================#}
+
+{# Build the select options array #}
+{% set options = [] %}
+{% for tag in context.content.taxonomy[taxonomy.slug]|default([]) %}
+    {% set options = options|merge([{
+        value:     tag,
+        text:      tag,
+        selected:  true,
+    }]) %}
+{% endfor %}
+
+{# BUIC options #}
+{% set buico_select = {
+    'clear':     true,
+    'id':        'taxonomy-' ~ taxonomy.slug,
+    'multiple':  true,
+    'name':      'taxonomy[' ~ taxonomy.slug ~ '][]',
+    'options':   options,
+} %}
+
+{#=== FIELDSET =======================================================================================================#}
+
+{% extends '_base/_fieldset.twig' %}
+
+{% block fieldset_type 'tags' %}
+
+{% set fieldset_conf = {
+    slug:  taxonomy.slug,
+}%}
+
+{% block fieldset_label_text  taxonomy.name %}
+{% block fieldset_label_class 'col-sm-3' %}
+
+{% block fieldset_controls %}
+    <div class="col-sm-9">
+        {{ buic.select(buico_select) }}
+        {% if taxonomy.tagcloud %}
+            <div class="tagcloud"></div>
+        {% endif %}
+    </div>
+{% endblock fieldset_controls %}

@@ -1,0 +1,33 @@
+{#=== OPTIONS ========================================================================================================#}
+
+{% set option = {
+    label:  field.label,
+    info:   field.info|default('')
+} %}
+
+{#=== INIT ===========================================================================================================#}
+
+{% set buico = {
+    checkbox: {
+        checked:  context.content.get(contentkey),
+        id:       key,
+        name:     name,
+    }
+} %}
+
+{#=== FIELDSET =======================================================================================================#}
+
+{% extends '_base/_fieldset.twig' %}
+
+{% block fieldset_type 'checkbox' %}
+
+{% block fieldset_label_text  labelkey %}
+{% block fieldset_label_info  option.info %}
+{% block fieldset_label_class 'col-md-3' %}
+{% block fieldset_label_for   key %}
+
+{% block fieldset_controls %}
+    <div class="col-md-9">
+        {{ buic.checkbox(buico.checkbox) }}
+    </div>
+{% endblock fieldset_controls %}

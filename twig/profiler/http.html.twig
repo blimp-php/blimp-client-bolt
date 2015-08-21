@@ -1,0 +1,71 @@
+{% extends app.request.isXmlHttpRequest ? '@WebProfiler/Profiler/ajax_layout.html.twig' : '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set icon %}
+        <img width="28" height="28" alt="Blimp" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAEOElEQVR42rWVW2sbRxTH1zR5Dk2xY2jTUlxKqEuokW3ZkmWvZFuyLO1qb7P3Xa1Wq6tvdU3a17y13ygg8EMgtM9pE4d8gzzltUa76PSMiYxQpQrXysCfo52zzG/+c85omWkMQsgnNIqOODcwPcN8jFGvx+7SyAf8A94rvuVcLhjYxMxHgVFnvMe9Ii0ZShUOeK+gTx0a+wDLOtk5vsK9Jk2E+fzfYiCAUC1NF8o+Ze/QmCf5WXR0obYVEKtCV0SQGJRCuSYCBReGoLeCpUhqFo/xjXagghSIXQkB16oJodKQQKJQZwK0n2RZ9s6w+t2YI7n7gl/6S0eYXJcuqaNB4RwodamrNGQKxboWlbEOJlkvVfLfYc3euWc2GIcaIJQu3iO4eF/0WW0pV3n7xAT9UIWCW2iPXVReX176HvsBzy79GcNkaNyjxj6N3eM87jc8ypeoDlcuPMPaXWgtQkE9tSlfRXxGqPie8wodfI/qBeq5FEhfjHSmJlb/OHI1qJsyNCwZ6pYCbU0AceHL2vDmslpWN4900JpKpDYVQGchdYWb6YwyMwa4cn4Y2ND2jbBR1qFVMaMDz4AfGMajeVrPfvPsmbuedWwAuopQoCHQ+dEEdHQ+uPZE4IFvQsPVujWH9DCGbVeFJMOUaT4Wi93t38Ndfde7qlObRDoFtgkCrUHgTF//DawYULdJWLMJjVEbY2bQIYr+zpCM55xYCFQjhGITkdBF4M0d4lHWTDlEQc1SohbWcncEkCWsRwHGoRoZByqNoXtq3xxIj7BmSGFgSBAYctTURdgfAUxICQTaYB5pEcJoDMs//R8gdmagiWGA3RnoYtRQS8CNAK4Ja14ZHdknRmQdaWCd6JOBw4XFa3Heos5IKawSHqpqKarLHAgPP/eGm2aVXy1ToHNqRtax3rNPjdA7c4DzijdwiMAmOqrKXOhLRagqXFQT9kF4tPAvh4/2Fj3v1AH/Fzcqn1ng/+yE/hMXuBEOxw6yttxpyEXwhf2wUspDRdyPAi4H/LcL+vC7OStX885csI8McI5NsA4N8J94wFWKv48E6psrD7Fmz7Xkygs1udJREebk0u8rfA68YraHuooVBFqZ1AVu5pmajHe05OpLLR77dadO7qXkVI6ZZ9LMYybDfMWkv858k+VdfmmsIyUea/tZFuoIqRZ2wUO5+e0eCq61v9PzcZ7mW6U9QOA7ObmyOPHfa9wgibiCDsDNZcDJsl0UDAlz6Usf4cZW4k+yuHj/+lP2dPSnbOwu+kklvqRbbBLcnS2wtlMhCvqyt1PdSjYN+kb8TX5+frbfPMykMRm6rJtb62BnNsBkkyGKxq63swnaRvyCLC2NgN0SqiUQurkG1lYC9M31yzLCtY3V12Li8RzN1/Ee3oIzHorHB+X0Bm2QV6NgU4ciKEC9NeLxB1OCTW5nMZGY63fjNBb+B29UTr/FR7PoAAAAAElFTkSuQmCC" />
+        <span class="sf-toolbar-status{% if 50 < collector.callscount %} sf-toolbar-status-yellow{% endif %}">{{ collector.callscount }} Req.</span>
+
+        {% if collector.callscount > 0 %}
+            <span>in {{ '%0.0f'|format(collector.time) }} ms</span>
+        {% endif %}
+    {% endset %}
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>HTTP Calls</b>
+            <span>{{ collector.callscount }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Calls time</b>
+            <span>{{ '%0.0f'|format(collector.time) }} ms</span>
+        </div>
+    {% endset %}
+    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { 'link': profiler_url } %}
+{% endblock %}
+
+{% block menu %}
+<span class="label">
+    <span class="icon">
+        <img width="28" height="28" alt="Blimp" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAEOElEQVR42rWVW2sbRxTH1zR5Dk2xY2jTUlxKqEuokW3ZkmWvZFuyLO1qb7P3Xa1Wq6tvdU3a17y13ygg8EMgtM9pE4d8gzzltUa76PSMiYxQpQrXysCfo52zzG/+c85omWkMQsgnNIqOODcwPcN8jFGvx+7SyAf8A94rvuVcLhjYxMxHgVFnvMe9Ii0ZShUOeK+gTx0a+wDLOtk5vsK9Jk2E+fzfYiCAUC1NF8o+Ze/QmCf5WXR0obYVEKtCV0SQGJRCuSYCBReGoLeCpUhqFo/xjXagghSIXQkB16oJodKQQKJQZwK0n2RZ9s6w+t2YI7n7gl/6S0eYXJcuqaNB4RwodamrNGQKxboWlbEOJlkvVfLfYc3euWc2GIcaIJQu3iO4eF/0WW0pV3n7xAT9UIWCW2iPXVReX176HvsBzy79GcNkaNyjxj6N3eM87jc8ypeoDlcuPMPaXWgtQkE9tSlfRXxGqPie8wodfI/qBeq5FEhfjHSmJlb/OHI1qJsyNCwZ6pYCbU0AceHL2vDmslpWN4900JpKpDYVQGchdYWb6YwyMwa4cn4Y2ND2jbBR1qFVMaMDz4AfGMajeVrPfvPsmbuedWwAuopQoCHQ+dEEdHQ+uPZE4IFvQsPVujWH9DCGbVeFJMOUaT4Wi93t38Ndfde7qlObRDoFtgkCrUHgTF//DawYULdJWLMJjVEbY2bQIYr+zpCM55xYCFQjhGITkdBF4M0d4lHWTDlEQc1SohbWcncEkCWsRwHGoRoZByqNoXtq3xxIj7BmSGFgSBAYctTURdgfAUxICQTaYB5pEcJoDMs//R8gdmagiWGA3RnoYtRQS8CNAK4Ja14ZHdknRmQdaWCd6JOBw4XFa3Heos5IKawSHqpqKarLHAgPP/eGm2aVXy1ToHNqRtax3rNPjdA7c4DzijdwiMAmOqrKXOhLRagqXFQT9kF4tPAvh4/2Fj3v1AH/Fzcqn1ng/+yE/hMXuBEOxw6yttxpyEXwhf2wUspDRdyPAi4H/LcL+vC7OStX885csI8McI5NsA4N8J94wFWKv48E6psrD7Fmz7Xkygs1udJREebk0u8rfA68YraHuooVBFqZ1AVu5pmajHe05OpLLR77dadO7qXkVI6ZZ9LMYybDfMWkv858k+VdfmmsIyUea/tZFuoIqRZ2wUO5+e0eCq61v9PzcZ7mW6U9QOA7ObmyOPHfa9wgibiCDsDNZcDJsl0UDAlz6Usf4cZW4k+yuHj/+lP2dPSnbOwu+kklvqRbbBLcnS2wtlMhCvqyt1PdSjYN+kb8TX5+frbfPMykMRm6rJtb62BnNsBkkyGKxq63swnaRvyCLC2NgN0SqiUQurkG1lYC9M31yzLCtY3V12Li8RzN1/Ee3oIzHorHB+X0Bm2QV6NgU4ciKEC9NeLxB1OCTW5nMZGY63fjNBb+B29UTr/FR7PoAAAAAElFTkSuQmCC" />
+    </span>
+    <strong>Guzzle</strong>
+    <span class="count">
+        <span>{{ collector.callscount }}</span>
+        <span>{{ '%0.0f'|format(collector.time) }} ms</span>
+    </span>
+</span>
+{% endblock %}
+
+{% block panel %}
+    {{ block('calls') }}
+{% endblock %}
+
+{% block calls %}
+    <h2>Calls</h2>
+
+    {% if collector.calls is empty %}
+        <p>
+            <em>No calls.</em>
+        </p>
+    {% else %}
+        <ul class="alt">
+            {% for i, call in collector.calls %}
+                <li class="{{ cycle(['odd', 'even'], i) }}">
+<pre>
+{{ call.request_method|raw }} {{ call.request_path|raw }}
+{{ call.request_headers|raw }}
+
+{{ call.response_headers|raw }}
+
+{{ call.log|raw }}
+</pre>
+                    <br /><br />
+                    <small>
+                        <strong>Time</strong>: {{ '%0.2f'|format(call.executionMS) }} ms
+                        <strong>Memory</strong>: {{ '%0.2f'|format(call.memory / 1024) }} KiB
+                    </small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endblock %}

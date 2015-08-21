@@ -1,0 +1,77 @@
+{#=== OPTIONS ========================================================================================================#}
+
+{% set option = {
+    extensions:  field.extensions|default([]),
+    label:       field.label,
+    upload:      field.upload|default(''),
+    can_upload:  field.canUpload,
+    info:        field.info|default('info.upload.filelist')
+} %}
+
+{#=== INIT ===========================================================================================================#}
+
+{% set attributes = {
+    fileupload: {
+        accept:       option.extensions ? '.' ~ option.extensions|join(',.') : '',
+        data_upload:  {type: 'FileList', key: key}|json_encode(),
+        data_url:     url('upload', {'handler': option.upload}),
+        id:           'fileupload-' ~ key,
+        multiple:     true,
+        name:         'files[]',
+        type:         'file',
+    }
+} %}
+
+{% if context.content.get(key) is defined %}
+    {% set list_json = context.content.get(contentkey)|json_encode() %}
+{% else %}
+    {% set list_json = '' %}
+{% endif %}
+
+{% set can_upload = context.can.upload and option.can_upload %}
+
+{#=== BLOCKS =========================================================================================================#}
+
+{% set listdata = {
+    'typelist':         option.extensions ? '.' ~ option.extensions|join(', .') : '–',
+} %}
+
+{#=== FIELDSET =======================================================================================================#}
+
+{% extends '_base/_fieldset.twig' %}
+
+{% block fieldset_type 'filelist' %}
+
+{% block fieldset_label_text  labelkey %}
+{% block fieldset_label_info  option.info %}
+{% block fieldset_label_class 'col-xs-12' %}
+
+{% block fieldset_controls %}
+    <div class="col-xs-12 filelistholder dropzone" id="filelist-{{ key }}">
+        {# Filelist #}
+        <div class="list" data-list="{{ listdata|json_encode }}"></div>
+
+        {# Buttons #}
+        <div class="clearfix">
+            {{ macro.upload_buttons('file', key, attributes.fileupload, option.upload, can_upload) }}
+
+            <button type="button" class="btn btn-default remove-selected-button">
+                <i class="fa fa-trash"></i>
+                <span>{{ __('Remove selected') }}</span>
+            </button>
+        </div>
+
+        {# Progress info #}
+        <div class="uploading-list hide"></div>
+
+        {# Data #}
+        <textarea name="{{ name }}" id="{{ key }}" class="hide">{{ list_json }}</textarea>
+
+        {# Modal "Select from server" #}
+        <div class="modal fade" id="selectModal-{{ key }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
+            </div>
+        </div>
+    </div>
+{% endblock fieldset_controls %}

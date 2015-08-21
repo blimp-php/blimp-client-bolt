@@ -1,0 +1,76 @@
+{#=== OPTIONS ========================================================================================================#}
+
+{% set option = {
+    label:     field.label,
+    multiple:  (field.multiple is defined and field.multiple),
+    values:    field.values|default([]),
+    info:      field.info|default('')
+} %}
+
+{#=== INIT ===========================================================================================================#}
+
+{% if option.values is iterable %}
+    {% set values = option.values %}
+{% else %}
+    {% set lookuptype = option.values|split('/')|first %}
+    {% set lookupfield = option.values|split('/')|last %}
+    {% if ',' in lookupfield %}
+        {% set lookupfield = lookupfield|split(',') %}
+    {% endif %}
+    {% set sortingorder = field.sort|default(lookupfield|first) %}
+    {% set querylimit = field.limit|default(500) %}
+    {% set wherefilter = field.filter|default({}) %}
+    {% setcontent lookups = lookuptype where wherefilter order sortingorder nohydrate limit querylimit %}
+    {% set values = lookups|selectfield(lookupfield, option.multiple, field.keys|default('id')) %}
+{% endif %}
+
+{# Get the current selection. Either a single value, or an array. #}
+{% set selection = context.content.get(contentkey)|default(null) %}
+{% if selection is not iterable %}
+    {% set selection = [ selection ] %}
+{% endif %}
+
+{# If the current selection contains an existing id, we must use _only_ the id, and not accept a fallback. #}
+{% set onlyids = selection|first in values|keys %}
+
+{# Build the select options array #}
+{% set options = [] %}
+{% for id, value in values %}
+    {% set is_array = (value is iterable and (value | length) > 1) %}
+    {% set options = options|merge([{
+        value:     id,
+        text:      is_array ? value[0:]|join(' / ') : value,
+        selected:  id in selection or (not onlyids and (is_array ? value[0] : value) in selection),
+    }]) %}
+{% endfor %}
+
+{# BUIC options #}
+{% set buico_select = {
+    'all':       option.multiple,
+    'clear':     true,
+    'id':        key,
+    'multiple':  option.multiple,
+    'name':      option.multiple ? name ~ '[]' : name,
+    'options':   options,
+} %}
+
+{#=== FIELDSET =======================================================================================================#}
+
+{% extends '_base/_fieldset.twig' %}
+
+{% block fieldset_type 'select' %}
+
+{% set fieldset_conf = {
+    autocomplete: field.autocomplete|default(false)
+} %}
+
+{% block fieldset_label_text  labelkey %}
+{% block fieldset_label_info  option.info %}
+{% block fieldset_label_class 'col-sm-3' %}
+{% block fieldset_label_for   key %}
+
+{% block fieldset_controls %}
+    <div class="col-sm-9">
+        {{ buic.select(buico_select) }}
+    </div>
+{% endblock fieldset_controls %}
