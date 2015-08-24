@@ -12,6 +12,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Bolt\Extension\Blimp\Client\DataCollector\BlimpDataCollector;
 use Bolt\Extension\Blimp\Client\DataCollector\HttpDataCollector;
 
+use Bolt\Extension\Blimp\Client\Storage\BlimpStorage;
+use Bolt\Extension\Blimp\Client\Storage\BlimpRecordModifier;
+
 class BlimpClientServiceProvider implements ServiceProviderInterface {
     private $ext;
     private $app;
@@ -29,7 +32,7 @@ class BlimpClientServiceProvider implements ServiceProviderInterface {
         $templates = $app['data_collector.templates'];
         $bolt = array_shift($templates);
         $templates = array_merge(
-            [['blimp', '@BlimpProfiler/profiler/toolbar.html.twig']],
+            [['blimp', '@BlimpProfiler/toolbar.html.twig']],
             $templates
         );
 
@@ -38,7 +41,7 @@ class BlimpClientServiceProvider implements ServiceProviderInterface {
 
         $templates = array_merge(
             $templates,
-            [['blimp-http', '@BlimpProfiler/profiler/http.html.twig']]
+            [['blimp-http', '@BlimpProfiler/http.html.twig']]
         );
 
         $app['data_collector.templates'] = $templates;
@@ -63,11 +66,23 @@ class BlimpClientServiceProvider implements ServiceProviderInterface {
             $app->extend(
                 'twig.loader.filesystem',
                 function (\Twig_Loader_Filesystem $filesystem, Application $app) {
-                    $filesystem->addPath(__DIR__ . '/../twig', 'BlimpProfiler');
+                    $filesystem->addPath(__DIR__ . '/../../profiler', 'BlimpProfiler');
 
                     return $filesystem;
                 }
             )
+        );
+
+        $app['blimp_client.storage'] = $app->share(
+            function ($app) {
+                return new BlimpStorage($app);
+            }
+        );
+
+        $app['blimp_client.storage.record_modifier'] = $app->share(
+            function ($app) {
+                return new BlimpRecordModifier($app);
+            }
         );
 
         $app['blimp_client.backend_url'] = '';

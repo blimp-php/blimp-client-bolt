@@ -97,6 +97,7 @@ class HttpDataCollector extends DataCollector implements SubscriberInterface {
                 $response->getReasonPhrase()
             ) . "\r\n" . $this->headers($response)
             : null,
+            'response_body' => $response && $response->getStatusCode() > 299 ? (string) $response->getBody() : null,
             'log' => $this->format(HttpDataCollector::CLF,
                 $request,
                 $response,
