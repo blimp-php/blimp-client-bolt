@@ -36,11 +36,42 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
         // Update the content object
         $content->setValues($fieldvalues);
 
+        $extra = [];
+
+        if(!empty($contenttype['relations'])) {
+            $relations = $content->related();
+
+            if(!empty($relations)) {
+                foreach ($relations as $related) {
+                    if(!empty($related->values['blimp_id'])) {
+                        if(!empty($contenttype['relations'][$related->contenttype['slug']])) {
+                            $multiple = !empty($contenttype['relations'][$related->contenttype['slug']]['multiple']) && $contenttype['relations'][$related->contenttype['slug']]['multiple'];
+
+                            if($multiple) {
+                                if(empty($extra[$related->contenttype['slug']])) {
+                                    $extra[$related->contenttype['slug']] = [];
+                                }
+
+                                $extra[$related->contenttype['slug']][] = $related->values['blimp_id'];
+                            } else {
+                                $extra[$related->contenttype['singular_slug']] = $related->values['blimp_id'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Decide whether to insert a new record, or update an existing one.
+        $ok = false;
         if ($create) {
-            $this->insertContent($content, $comment);
+            $ok = $this->insertContent($content, $comment, $extra);
         } else {
-            $this->updateContent($content, $comment);
+            $ok = $this->updateContent($content, $comment, $extra);
+        }
+
+        if($ok !== true) {
+            return $ok;
         }
 
         $content->setValue('status', 'published');
@@ -306,11 +337,12 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
      *
      * @return boolean
      */
-    protected function insertContent(Content $content, $comment = null) {
+    protected function insertContent(Content &$content, $comment = null, $extra = []) {
         $collection = $this->getContentTypeCollection($content->contenttype);
 
         // Get the JSON database prepared values and make sure it's valid
         $fieldvalues = $this->getValidSaveData($content->getValues(true), $content->contenttype);
+        $fieldvalues = array_merge($fieldvalues, $extra);
 
         $res = $this->app['blimp_client.request']('POST', $collection, null, $fieldvalues);
 
@@ -341,7 +373,7 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
      *
      * @return bool
      */
-    private function updateContent(Content $content, $comment = null) {
+    private function updateContent(Content &$content, $comment = null, $extra = []) {
         $synced = $content->contenttype['blimp_mode'] === 'sync';
 
         $collection = $this->getContentTypeCollection($content->contenttype);
@@ -360,6 +392,7 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
 
         // Get the JSON database prepared values and make sure it's valid
         $fieldvalues = $this->getValidSaveData($content->getValues(true), $content->contenttype);
+        $fieldvalues = array_merge($fieldvalues, $extra);
 
         $uri = $collection . '/' . $id;
         $res = $this->app['blimp_client.request']('PUT', $uri, null, $fieldvalues);
@@ -485,6 +518,25 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
         }
 
         return '/' . $contenttype['slug'];
+    }
+
+    /**
+     * Get the tablename with prefix from a given Contenttype.
+     *
+     * @param string|array $contenttype
+     *
+     * @return string
+     */
+    public function getContentTypeField($contenttype, $field) {
+        if (is_string($contenttype)) {
+            $contenttype = $this->getContentType($contenttype);
+        }
+
+        if (!empty($contenttype['fields'][$name]) && !empty($contenttype['fields'][$name]['blimp_field'])) {
+            return $contenttype['fields'][$name]['blimp_field'];
+        }
+
+        return $field;
     }
 
     /**
@@ -1194,6 +1246,11 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
      * @return boolean
      */
     private function isValidColumn($name, $contenttype, $allowVariants = false) {
+        // don't send the 'blimp_id'
+        if($name == 'blimp_id') {
+            return false;
+        }
+
         // Strip the minus in '-title' if allowed.
         if ($allowVariants) {
             if ((strlen($name) > 0) && ($name[0] == "-")) {
@@ -1206,8 +1263,9 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
             return true;
         }
 
+        // don't send the base fields
         if (in_array($name, Content::getBaseColumns())) {
-            return true;
+            return false;
         }
 
         return false;

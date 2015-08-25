@@ -1,5 +1,5 @@
 <?php
-namespace Bolt\Extension\Blimp\Client\Controller\Backend;
+namespace Bolt\Extension\Blimp\Client\Controller;
 
 use Bolt\Controller\Backend\Records;
 use Silex\ControllerCollection;
