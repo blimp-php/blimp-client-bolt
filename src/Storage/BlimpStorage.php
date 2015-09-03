@@ -375,20 +375,24 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
      */
     private function updateContent(Content &$content, $comment = null, $extra = []) {
         $synced = $content->contenttype['blimp_mode'] === 'sync';
+        // $store = $content->contenttype['blimp_type'] === 'store';
 
         $collection = $this->getContentTypeCollection($content->contenttype);
 
         $id = $synced ? $content['blimp_id'] : $content['id'];
 
-        // Test that the record exists in the database
         $oldContent = $this->findContent($collection, $id);
-        if (empty($oldContent)) {
-            if($synced) {
-                return $this->insertContent($content, $comment);
-            }
 
-            throw new StorageException('Attempted to update a non-existent record');
-        }
+        // TODO: Verify if blimp_id changed
+        // $oldContentDb = parent::findContent(parent::getContenttypeTablename($contenttype), $id);
+
+        // if (empty($oldContent)) {
+        //     if($synced) {
+        //         return $this->insertContent($content, $comment);
+        //     }
+
+        //     throw new StorageException('Attempted to update a non-existent record');
+        // }
 
         // Get the JSON database prepared values and make sure it's valid
         $fieldvalues = $this->getValidSaveData($content->getValues(true), $content->contenttype);
