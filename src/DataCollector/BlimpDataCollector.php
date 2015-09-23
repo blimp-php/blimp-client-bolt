@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 
-class BlimpDataCollector extends \Bolt\DataCollector\BoltDataCollector {
+class BlimpDataCollector extends \Bolt\Profiler\BoltDataCollector {
     protected $app;
     protected $data;
 
