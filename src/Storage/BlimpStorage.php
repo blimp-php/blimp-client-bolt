@@ -341,7 +341,7 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
         $collection = $this->getContentTypeCollection($content->contenttype);
 
         // Get the JSON database prepared values and make sure it's valid
-        $fieldvalues = $this->getValidSaveData($content->getValues(true), $content->contenttype);
+        $fieldvalues = $this->getValidSaveData($content->getValues(false), $content->contenttype);
         $fieldvalues = array_merge($fieldvalues, $extra);
 
         $res = $this->app['blimp_client.request']('POST', $collection, null, $fieldvalues);
@@ -395,7 +395,7 @@ class BlimpStorage extends \Bolt\Legacy\Storage {
         // }
 
         // Get the JSON database prepared values and make sure it's valid
-        $fieldvalues = $this->getValidSaveData($content->getValues(true), $content->contenttype);
+        $fieldvalues = $this->getValidSaveData($content->getValues(false), $content->contenttype);
         $fieldvalues = array_merge($fieldvalues, $extra);
 
         $uri = $collection . '/' . $id;
